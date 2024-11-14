@@ -8,7 +8,7 @@ extern "C" char mBoard[6][7] = {
 				   {'.','.','.','.','.','.','.'},
 				   {'.','.','.','.','.','.','.'},
 				   {'.','.','.','.','.','.','.'} };
-				   
+
 extern "C" char tecla;			// Codi ascii corresponent a la tecla pitjada
 
 extern "C" int row;				//fila per a accedir a la matriu gameCards [1..5]
@@ -26,5 +26,5 @@ extern "C" int colScreenIni;	//columna inicial del taulell en coordenades de pan
 extern "C" int pos;				//índex per a accedir a la matriu mBoard
 extern "C" char carac;			//codi ascii del caràcter que es vol treure per pantalla.
 
-
-
+extern "C" int inaRow;			//compatador de fitxes en ratlla (si arriba a 4 hi ha "4 en ratlla")
+extern "C" int row4Complete;	//indica que s’ha assolit la fita de les 4 fitxes en ratlla.

@@ -18,6 +18,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="globals_Mig.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main_Mig.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="prac_Mig.asm.asm" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -127,17 +136,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\globals_Basic.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\main_Basic.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="..\prac_Basic.asm">
-      <FileType>Document</FileType>
-    </MASM>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />

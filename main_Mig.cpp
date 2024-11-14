@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <windows.h>
-#include "globals_Basic.h"
+#include "globals_Mig.h"
 
 extern "C" {
 	// Difinició de Subrutines en ASM
@@ -16,6 +16,8 @@ extern "C" {
 	void moveCursor();
 	void moveCursorContinuous();
 	void putPiece();
+	void put2Players();
+	void Play();
 
 
 	void printChar_C(char c);
@@ -33,7 +35,7 @@ extern "C" {
   */
 
 char carac,tecla;
-int  rowScreenIni= 6; //Fila inicial del taulell
+int  rowScreenIni = 6; //Fila inicial del taulell
 int  colScreenIni = 8; //Columna inicial del taulell
 int  row;
 char col,colCursor;
@@ -41,6 +43,9 @@ int  pos;
 int  player = 1;
 int  rowScreen;
 int  colScreen;
+int row4Complete = 0;
+int inaRow;
+int i, j;
 
 
 int opc;
@@ -92,6 +97,8 @@ int printMenu_C() {
 	printf("|       4. Move Cursor          |\n");
 	printf("|       5. Move Continuous      |\n");
 	printf("|       6. Put Piece            |\n");
+	printf("|       7. Put 2 players        |\n");
+	printf("|       8. Play                 |\n");
 	printf("|                               |\n");
 	printf("|                               |\n");
 	printf("|        0. Exit                |\n");
@@ -172,7 +179,7 @@ int main(void) {
 
 	while (opc != '0') {
 		printMenu_C();				//Mostrar menú
-		gotoxy_C(20, 20);			//Situar el cursor
+		gotoxy_C(22, 20);			//Situar el cursor
 		opc = getch_C();			//Llegir una opció
 		switch (opc) {
 		case '1':					//Primera Opció del Menú --> 1. Show Cursor
@@ -245,9 +252,7 @@ int main(void) {
 
 			getch_C();
 			break;
-		case '6':					//Sexta Opció del Menú --> 5. Put Piece
-			row = 3;
-			col = 'B';
+		case '6':					//Sexta Opció del Menú --> 6. Put Piece
 			clearscreen_C();  		//Esborra la pantalla
 			printBoard_C();   		//Mostrar el tauler.
 
@@ -263,6 +268,47 @@ int main(void) {
 				printf("  Piece inserted - Press any key ");
 			else
 				printf("           Press any key          ");
+			getch_C();
+
+			break;
+		case '7':					//Septima Opció del Menú --> 7. Put 2 players
+			clearscreen_C();  		//Esborra la pantalla
+			printBoard_C();   		//Mostrar el tauler.
+			player = 1;
+			gotoxy_C(30, 5);
+			printf(" Press j, k, <space> or <Quit> ");
+			colCursor = 'D';		//Columna inicial on volem que aparegui el cursor 'D'
+
+			put2Players();
+
+			gotoxy_C(30, 2);		//Situar el cursor a sota del tauler
+			printf("          Press any key          ");
+
+			getch_C();
+			break;
+		case '8':					//Octava Opció del Menú --> 8. Play
+			clearscreen_C();  		//Esborra la pantalla
+			printBoard_C();   		//Mostrar el tauler.
+			player = 1;
+			gotoxy_C(30, 5);
+			printf(" Press j, k, <space> or <Quit> ");
+			colCursor = 'D';		//Columna inicial on volem que aparegui el cursor 'D'
+			
+			row4Complete = 0;
+			for (i = 0; i < 6; i++)
+				for (j = 0; j < 7; j++)
+					mBoard[i][j] = '.';
+
+			Play();
+
+			gotoxy_C(30, 2);
+			if (row4Complete != 1)
+				printf("           Press any key          ");
+			else
+				if (player == 1)
+					printf("            Player 1 WINS          ");
+				else
+					printf("            Player 2 WINS          ");
 			getch_C();
 
 			break;

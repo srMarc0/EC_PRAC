@@ -9,11 +9,12 @@ getch_C PROTO C
 
 
 ;Subrutines cridades des de C
-public C showCursor, showPlayer, showBoard, moveCursor, moveCursorContinuous, putPiece
+public C showCursor, showPlayer, showBoard, moveCursor, moveCursorContinuous, putPiece, put2Players, Play
                          
 ;Variables utilitzades - declarades en C
 extern C row: DWORD, col: BYTE, rowScreen: DWORD, colScreen: DWORD, rowScreenIni: DWORD, colScreenIni: DWORD 
 extern C carac: BYTE, tecla: BYTE, colCursor: BYTE, player: DWORD, mBoard: BYTE, pos: DWORD
+extern C inaRow: DWORD, row4Complete: DWORD
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Les subrutines que heu de modificar per la pràctica nivell bàsic son:
@@ -156,7 +157,7 @@ getch endp
 ; Per calcular la posició del cursor a pantalla (rowScreen) i (colScreen)
 ; cal utilitzar aquestes fórmules:
 ;
-;            rowScreen=rowScreenIni
+;            rowScreen=rowScreenIni-2
 ;            colScreen=colScreenIni+(colCursor*4)
 ;
 ; Tenir en compte que colCursor és un caràcter (ascii) que s’ha de
@@ -185,9 +186,6 @@ showCursor proc
 	mov [colScreen], eax
 
 	call gotoxy
-	
-
-
 
 
 	;Fi Codi de la pràctica
@@ -206,7 +204,7 @@ showCursor endp
 ; Cal cridar a la subrutina gotoxy per a posicionar el cursor 
 ; i a la subrutina printch per a mostrar el caràcter.
 ; La subrutina printch mostra per pantalla el caràcter emmagatzemat
-; a la variable carac.
+; al registre dil.
 ;
 ; Variables utilitzades:
 ; rowScreen : fila on volem posicionar el cursor a la pantalla.
@@ -266,6 +264,7 @@ showBoard proc
 
 	mov esi, 0 ; iterador i
 	mov edi, 0 ; iterador j
+	mov ecx, 0 ; para posicion
 
 bucleESI:
 	cmp esi, 6
@@ -290,7 +289,8 @@ bucleEDI:
 	add eax, [ColScreenIni]
 	mov [colScreen], eax
 
-	mov al, [mBoard] 
+	mov al, [mBoard + ecx] 
+	inc ecx
 	mov [carac], al
 	call gotoxy
 	call printch
@@ -342,7 +342,8 @@ inicio:
     je derecha
 
     cmp al, ' '          
-    je fin      
+    je fin    
+	jmp inicio
 izquierda:
 	mov bl, [colCursor]
 	cmp bl, 'A'
@@ -424,32 +425,90 @@ moveCursorContinuous endp
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 calcIndex proc
+    push ebp
+    mov  ebp, esp
+
+    ; Cargar el valor de row en EAX
+	mov eax, 0
+	mov ebx, 0
+
+    mov eax, [row]           ; EAX = row
+
+    ; Cargar el valor de col en BL y convertirlo a número
+    mov bl, [col] ; Cargar col en BL y extender a 32 bits en EBX
+    sub ebx, 'A'              ; Convertir de carácter a número (EBX = col - '0')
+
+    ; Multiplicar row por 7
+    imul eax, 7          ; EAX = row * 7
+
+    ; Sumar col a row * 7
+    add eax, ebx              ; EAX = EAX + col
+
+    ; Guardar el resultado en pos
+    mov [pos], eax            ; Guardar el índice calculado en pos
+
+	
+    ; Finalizar la subrutina
+    mov esp, ebp
+    pop ebp
+    ret
+
+	calcIndex endp
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; A partir de la posició en la que ha quedat la fitxa introduïda comprovar si les fitxes 
+; que hi ha per sota en vertical coincideixen amb la que acabem d’introduir.
+; Si coincideix incrementar el comptador i comprovar si hem arribat a 4.
+; Si no hem arribat a 4, seguim baixant.
+; Si hem arribat a 4, posem l’indicador row4Complete a 1.
+;
+; Variables utilitzades:
+; mBoard : matriu del taulell on anem inserint les fitxes
+; inaRow : comptador per a saber el nombre de fitxes en ratlla
+; row4Complete : indicador de si hem arribat a 4 fitxes en ratlla o no
+; pos : posició de la matriu mBoard que estem mirant
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+checkRow proc
 	push ebp
 	mov  ebp, esp
-
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
+	
+	mov eax, [row]
+	cmp eax, 2 ; compara si ens trobem a la fila 3
+	jg fi
 
-	mov eax, [row]   ; Cargar el valor de row en EAX
+	call calcIndex
+	mov esi, [pos] ; inicialitzem les posicions
+	mov bl, [mBoard + esi] ;agafem la posicio actual
+	
+	mov edi, esi ; asignem un iterador que s'anira suma i comparant
 
-    mov bl, [col]    ; Cargar el valor de col en BL
+bucle:
+	add edi, 7
+	cmp edi, 42; comparem si ha arribat al final
+	jg fi
+	mov cl, [mBoard + edi] ; agafem posicio inferior
+	cmp ebx, ecx ;comparem si son igual
+	jne fi
+	inc [inaRow]
+	cmp [inaRow], 3
+	jne bucle
+	mov row4Complete, 1
 
-    mov ecx, 7       ; Cargar 7 en ECX
-    imul eax, ecx     ; EAX = row * 7
-
-    add al, bl       ; EAX = EAX + col (AL se usa para el resultado)
-
-    mov [pos], eax    ; Guardar el resultado en pos
+fi:
+	mov [inaRow], 0
 
 
 
 	;Fi Codi de la pràctica
-
 	mov esp, ebp
 	pop ebp
 	ret
 
-calcIndex endp
 
+checkRow endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Situa una fitxa en una posició lliure del tauler de joc
@@ -469,39 +528,54 @@ calcIndex endp
 ; mBoard : matriu 6x7 on tenim el tauler
 ; carac : caràcter per a escriure a pantalla
 ; tecla: codi ascii de la tecla pitjada
-
+;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 putPiece proc
 	push ebp
 	mov  ebp, esp
 
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
+    mov eax, 0
+	mov esi, 0
 
-inici:
-	call moveCursorContinuous
- 	mov al, [tecla]
-	cmp al, ' '
-	je tirarFitxa
-	cmp al, 'q'
-	je inici
+    call showBoard
+    call showPlayer
+    call moveCursorContinuous
 
+    cmp [tecla], 'q'
+    je fin
 
-tirarFitxa:
-	call calcIndex
-	mov al, [mBoard]
-	add eax, [pos]
-	cmp eax, '.'
-	je pujaIndex
+    mov al, [colCursor]
+    mov [col], al
+    mov [row], 6
 
-	mov [carac], al
-	call printch
-	jmp inici
+bucle:
+    dec [row]
 
-pujaIndex:
-	dec[row]
-	jmp tirarFitxa
+    cmp [row], 0
+    jl fin
+    call calcIndex
+    mov esi, [pos]
 
+	mov bl, '.'
 
+    cmp [mBoard + esi], bl
+    jne bucle
+	mov ebx, [player]
+	cmp ebx, 2
+	je player2
+    mov al, '0'
+	jmp pasFitxa
+player2:
+	mov al, 'X'
+pasFitxa:
+    mov [mBoard + esi], al
+	call showBoard
+    
+	mov ecx, 0
+
+fin:
+ 
 	;Fi Codi de la pràctica
 
 	mov esp, ebp
@@ -511,6 +585,80 @@ pujaIndex:
 
 
 putPiece endp
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; S’han de permetre dues tirades, cridant a putPiece, 
+; una de cada jugador,
+; actualitzant a la casella corresponent de la pantalla
+; l’identificador del jugador cridant a showPlayer.
+; Si es pitja 'q'<Quit> o s’aconsegueix la ratlla de 4 fitxes
+;el procés ha de finalitzar.
+;
+; Variables utilitzades:
+; tecla: codi ascii de la tecla pitjada
+; player: Variable que indica quin jugador fa la tirada
+; row4Complete: variable que ha actualitzat la subrutina checkRow 
+; per a indicar si s’ha aconseguit una ratlla de 4 fitxes.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+put2Players proc
+	push ebp
+	mov  ebp, esp
+	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
+
+bucle:
+	cmp [row4Complete], 1
+	je fi
+
+	mov [player], 1
+	call putPiece
+	call checkRow
+
+	cmp [row4Complete], 1
+	je fi
+
+	inc [player]
+	call putPiece
+	call checkRow
+
+	jmp bucle
+fi:
+	mov [row4Complete], 0
+	;Fi Codi de la pràctica
+	mov esp, ebp
+	pop ebp
+	ret
+
+
+put2Players endp
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Es va cridant a put2Players mentre no es pitgi 'q'<Quit>
+; o un jugador aconsegueixi una ratlla de 4 fitxes.
+;
+; Variables utilitzades:
+; tecla: codi ascii de la tecla pitjada
+; row4Complete: variable que ha actualitzat la subrutina checkRow 
+; per a indicar si s’ha aconseguit una ratlla de 4 fitxes.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+Play proc
+	push ebp
+	mov  ebp, esp
+	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
+
+
+
+
+
+	;Fi Codi de la pràctica
+	mov esp, ebp
+	pop ebp
+	ret
+
+
+Play endp
 
 
 END
