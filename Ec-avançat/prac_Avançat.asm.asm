@@ -172,20 +172,12 @@ getch endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 showCursor proc
-    push ebp
+	push ebp
 	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
 
-	mov eax, [rowScreenIni] ;rowScreen
-	mov [rowScreen], eax
-	mov eax, 0
-	mov al, [colCursor] ;
-	sub al, 'A'
-	shl al, 2 ; *4
-	add eax, [colScreenIni]
-	mov [colScreen], eax
 
-	call gotoxy
+
 
 
 	;Fi Codi de la pràctica
@@ -213,21 +205,13 @@ showCursor endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 showPlayer proc
-    push ebp
+	push ebp
 	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
 
-	mov eax, [player]
-	add eax, '0' 
-	mov [rowScreen], 23
-	mov [colScreen], 19
-	mov ebx, [rowScreen]
-	mov ecx, [colScreen]
 
-	mov [carac], al
-	call gotoxy
-	call printch
-	
+
+
 
 	;Fi Codi de la pràctica
 	mov esp, ebp
@@ -258,48 +242,13 @@ showPlayer endp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 showBoard proc
-    push ebp
+	push ebp
 	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
 
-	mov esi, 0 ; iterador i
-	mov edi, 0 ; iterador j
-	mov ecx, 0 ; para posicion
-
-bucleESI:
-	cmp esi, 6
-	jge fin ; mas adelante
-
-	mov eax, esi;
-	shl eax, 1
-	add eax, 4
-	add eax, [RowScreenIni]
-	mov [rowScreen], eax
-		
-	inc esi; incrementamos i
-	mov edi, 0 ; iterador j
-
-bucleEDI:
-	cmp edi, 7
-	jge bucleESI ; saltamos al bucle
-
-	mov eax, edi
-	shl eax, 2
-	sub eax, 1
-	add eax, [ColScreenIni]
-	mov [colScreen], eax
-
-	mov al, [mBoard + ecx] 
-	inc ecx
-	mov [carac], al
-	call gotoxy
-	call printch
-
-	inc edi;incrementamos j
-	jmp  bucleEDI; mas adelante al cmp edi
 
 
-fin:
+
 
 	;Fi Codi de la pràctica
 	mov esp, ebp
@@ -324,52 +273,18 @@ showBoard endp
 ; colCursor: Variable que indica l columna en la que es troba el cursor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 moveCursor proc
-   push ebp
-   mov  ebp, esp 
-
+	push ebp
+	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
-inicio:
-	
-	call getch
-	mov al, [tecla]
-	cmp al, 'q' ; 81
-	je fin 
 
-	cmp al, 'j'          
-    je izquierda
 
-    cmp al, 'k'          
-    je derecha
 
-    cmp al, ' '          
-    je fin    
-	jmp inicio
-izquierda:
-	mov bl, [colCursor]
-	cmp bl, 'A'
-	je inicio
-	dec bl
-	mov [colCursor], bl
-	call showCursor
-	jmp inicio
-
-derecha: 
-	mov cl, [colCursor]
-	cmp cl, 'G'
-	jge inicio
-	inc cl
-	mov [colCursor], cl
-	call showCursor
-	jmp inicio
-
-fin:
 
 
 	;Fi Codi de la pràctica
-
-   mov esp, ebp
-   pop ebp
-   ret
+	mov esp, ebp
+	pop ebp
+	ret
 
 moveCursor endp
 
@@ -388,23 +303,13 @@ moveCursor endp
 moveCursorContinuous proc
 	push ebp
 	mov  ebp, esp
-
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
-inicio:
-	call getch
-	mov al, [tecla]
-	cmp al, 'q'
-	je fin 
-	cmp al, ' '
-	je fin
-	call moveCursor
-	jmp inicio
-fin:
+
+
 
 
 
 	;Fi Codi de la pràctica
-
 	mov esp, ebp
 	pop ebp
 	ret
@@ -425,35 +330,20 @@ moveCursorContinuous endp
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 calcIndex proc
-    push ebp
-    mov  ebp, esp
+	push ebp
+	mov  ebp, esp
+	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
 
-    ; Cargar el valor de row en EAX
-	mov eax, 0
-	mov ebx, 0
 
-    mov eax, [row]           ; EAX = row
 
-    ; Cargar el valor de col en BL y convertirlo a número
-    mov bl, [col] ; Cargar col en BL y extender a 32 bits en EBX
-    sub ebx, 'A'              ; Convertir de carácter a número (EBX = col - '0')
 
-    ; Multiplicar row por 7
-    imul eax, 7          ; EAX = row * 7
 
-    ; Sumar col a row * 7
-    add eax, ebx              ; EAX = EAX + col
+	;Fi Codi de la pràctica
+	mov esp, ebp
+	pop ebp
+	ret
 
-    ; Guardar el resultado en pos
-    mov [pos], eax            ; Guardar el índice calculado en pos
-
-	
-    ; Finalizar la subrutina
-    mov esp, ebp
-    pop ebp
-    ret
-
-	calcIndex endp
+calcIndex endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; A partir de la posició en la que ha quedat la fitxa introduïda comprovar si les fitxes 
@@ -474,31 +364,8 @@ checkRow proc
 	push ebp
 	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
-	
-	mov eax, [row]
-	cmp eax, 2 ; compara si ens trobem a la fila 3
-	jg fi
 
-	call calcIndex
-	mov esi, [pos] ; inicialitzem les posicions
-	mov bl, [mBoard + esi] ;agafem la posicio actual
-	
-	mov edi, esi ; asignem un iterador que s'anira suma i comparant
 
-bucle:
-	add edi, 7
-	cmp edi, 42; comparem si ha arribat al final
-	jg fi
-	mov cl, [mBoard + edi] ; agafem posicio inferior
-	cmp ebx, ecx ;comparem si son igual
-	jne fi
-	inc [inaRow]
-	cmp [inaRow], 3
-	jne bucle
-	mov row4Complete, 1
-
-fi:
-	mov [inaRow], 0
 
 
 
@@ -506,7 +373,6 @@ fi:
 	mov esp, ebp
 	pop ebp
 	ret
-
 
 checkRow endp
 
@@ -533,56 +399,16 @@ checkRow endp
 putPiece proc
 	push ebp
 	mov  ebp, esp
-
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
-    mov eax, 0
-	mov esi, 0
 
-    call showBoard
-    call showPlayer
-    call moveCursorContinuous
 
-    cmp [tecla], 'q'
-    je fin
 
-    mov al, [colCursor]
-    mov [col], al
-    mov [row], 6
 
-bucle:
-    dec [row]
 
-    cmp [row], 0
-    jl fin
-    call calcIndex
-    mov esi, [pos]
-
-	mov bl, '.'
-
-    cmp [mBoard + esi], bl
-    jne bucle
-	mov ebx, [player]
-	cmp ebx, 2
-	je player2
-    mov al, '0'
-	jmp pasFitxa
-player2:
-	mov al, 'X'
-pasFitxa:
-    mov [mBoard + esi], al
-	call showBoard
-    
-	mov ecx, 0
-
-fin:
- 
 	;Fi Codi de la pràctica
-
 	mov esp, ebp
 	pop ebp
 	ret
-
-
 
 putPiece endp
 
@@ -607,36 +433,15 @@ put2Players proc
 	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
 
-	mov [tecla], 'a'; inicialitzem a un valor perque no sigui 'q'
-bucle:
-	cmp [row4Complete], 1
-	je fi
 
-	cmp [tecla], 'q'
-    je fi
 
-	mov [player], 1
-	call putPiece
-	call checkRow
 
-	cmp [row4Complete], 1
-	je fi
-	cmp [tecla], 'q'
-    je fi
 
-	inc [player]
-	call putPiece
-	call checkRow
-
-	jmp bucle
-fi:
-	mov [row4Complete], 0
 	;Fi Codi de la pràctica
 	mov esp, ebp
 	pop ebp
 	ret
-
-
+	
 put2Players endp
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -654,15 +459,14 @@ Play proc
 	mov  ebp, esp
 	;Inici Codi de la pràctica: aquí heu d'escriure el vostre codi
 
-	call put2Players
 
 
-fin:
+
+
 	;Fi Codi de la pràctica
 	mov esp, ebp
 	pop ebp
 	ret
-
 
 Play endp
 
